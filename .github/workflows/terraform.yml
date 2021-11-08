@@ -7,7 +7,9 @@ on:
         required: true
       GCP_SA_KEY:
         required: true
-
+      TF_API_TOKEN:
+        required: true
+        
 jobs:
   terraform:
     name: "Terraform Plan"
