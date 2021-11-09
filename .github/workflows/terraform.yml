@@ -211,7 +211,7 @@ jobs:
         id: compliance_iam_check_approval
         uses: actions/github-script@v5
         env: 
-          SHA: "${{ github.sha }}"
+          SHA: "${{ github.event.pull_request.head.sha }}"
         if: steps.compliance_iam_check.outputs.exitcode != 0
         with:
           script: |
