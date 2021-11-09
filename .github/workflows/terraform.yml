@@ -218,11 +218,12 @@ jobs:
               repo: context.repo.repo,
               pull_number: ${{ github.event.number }},
            });
+           reviews.sort((a, b) => a.timestamp - b.timestamp;);
            if (reviews.data.length > 0) {
+             console.log(${{ github.sha }});
              console.log(reviews.data);
              reviews.data.forEach(review => {
-                console.log(review.user);
-                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED") {
+                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id == ${{ github.sha }}) {
                   core.setFailed("IAM changes need to be approved by the IAM team.");
                 }
              });
