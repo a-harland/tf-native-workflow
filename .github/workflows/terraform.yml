@@ -210,19 +210,22 @@ jobs:
       - name: Check IAM Approval
         id: compliance_iam_check_approval
         uses: actions/github-script@v5
+        env: 
+          SHA: "${{ github.sha }}"
         if: steps.compliance_iam_check.outputs.exitcode != 0
         with:
           script: |
+           const { SHA, METADATA_CHECK_ERRORS } = process.env;
            const reviews = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ github.event.number }},
            });
            if (reviews.data.length > 0) {
-             console.log(${{ github.sha }});
+             console.log(SHA);
              console.log(reviews.data);
              reviews.data.forEach(review => {
-                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id == ${{ github.sha }}) {
+                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id == SHA) {
                   core.setFailed("IAM changes need to be approved by the IAM team.");
                 }
              });
