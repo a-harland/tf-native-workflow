@@ -228,6 +228,7 @@ jobs:
                   console.log(review);
                   core.setFailed("IAM changes need to be approved by the IAM team.");
                 }
+                core.setFailed("IAM changes need to be approved by the IAM team.");
              });
            } else {
              core.setFailed("IAM changes need to be reviewed by the IAM team.");
