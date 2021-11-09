@@ -215,7 +215,7 @@ jobs:
         if: steps.compliance_iam_check.outputs.exitcode != 0
         with:
           script: |
-           const { SHA, METADATA_CHECK_ERRORS } = process.env;
+           const { SHA } = process.env;
            const reviews = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -223,9 +223,9 @@ jobs:
            });
            if (reviews.data.length > 0) {
              console.log(SHA);
-             console.log(reviews.data);
              reviews.data.forEach(review => {
-                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id == SHA) {
+                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id === SHA) {
+                  console.log(review);
                   core.setFailed("IAM changes need to be approved by the IAM team.");
                 }
              });
