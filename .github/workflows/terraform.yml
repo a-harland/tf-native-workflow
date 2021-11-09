@@ -228,7 +228,6 @@ jobs:
                   review.user.login === 'asaharland' 
                   && review.commit_id === SHA 
                   && review.state.toUpperCase() === "APPROVED")) {
-               console.log(review);
                console.log("Review approved by IAM team.");
              } else {
                core.setFailed("IAM changes need to be approved by the IAM team.");
