@@ -184,27 +184,6 @@ jobs:
         id: compliance_iam_check
         run: conftest test --parser json --policy ../../policy/iam tfplan.json
         
-      - name: Check IAM Approval
-        id: compliance_iam_check_approval
-        uses: actions/github-script@v5
-        if: steps.compliance_iam_check.outputs.exitcode != 0
-        with:
-          script: |
-           const reviews = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ github.event.number }},
-           });
-           if (reviews.data.length > 0) {
-             reviews.data.forEach(review => {
-                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED") {
-                  core.setFailed("IAM changes need to be approved by the IAM team.");
-                }
-             });
-           } else {
-             core.setFailed("IAM changes need to be approved by the IAM team.");
-           }
-        
       - name: Request IAM Approval
         id: compliance_iam_request
         uses: actions/github-script@v5
@@ -226,6 +205,27 @@ jobs:
                 pull_number: ${{ github.event.number }},
                 reviewers: ["asaharland"]
               });
+           }
+           
+      - name: Check IAM Approval
+        id: compliance_iam_check_approval
+        uses: actions/github-script@v5
+        if: steps.compliance_iam_check.outputs.exitcode != 0
+        with:
+          script: |
+           const reviews = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ github.event.number }},
+           });
+           if (reviews.data.length > 0) {
+             reviews.data.forEach(review => {
+                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED") {
+                  core.setFailed("IAM changes need to be approved by the IAM team.");
+                }
+             });
+           } else {
+             core.setFailed("IAM changes need to be approved by the IAM team.");
            }
 
   terraform_apply:
