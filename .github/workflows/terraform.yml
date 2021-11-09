@@ -223,8 +223,9 @@ jobs:
            });
            if (reviews.data.length > 0) {
              console.log(SHA);
-             if (reviews.data.users.some(review => 
-                  review.login === 'asaharland' 
+             console.log(reviews);
+             if (reviews.data.some(review => 
+                  review.user.login === 'asaharland' 
                   && review.commit_id === SHA 
                   && review.state.toUpperCase() === "APPROVED")) {
                console.log(review);
