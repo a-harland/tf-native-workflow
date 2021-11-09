@@ -223,13 +223,15 @@ jobs:
            });
            if (reviews.data.length > 0) {
              console.log(SHA);
-             reviews.data.forEach(review => {
-                if (review.user.login === "asaharland" && review.state.toUpperCase() !== "APPROVED" && review.commit_id === SHA) {
-                  console.log(review);
-                  core.setFailed("IAM changes need to be approved by the IAM team.");
-                }
-                core.setFailed("IAM changes need to be approved by the IAM team.");
-             });
+             if (reviews.data.users.some(review => 
+                  review.login === 'asaharland' 
+                  && review.commit_id === SHA 
+                  && review.state.toUpperCase() === "APPROVED")) {
+               console.log(review);
+               console.log("Review approved by IAM team.");
+             } else {
+               core.setFailed("IAM changes need to be approved by the IAM team.");
+             }
            } else {
              core.setFailed("IAM changes need to be reviewed by the IAM team.");
            }
