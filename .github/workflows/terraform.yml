@@ -39,6 +39,14 @@ jobs:
           terraform_version: 1.0.10
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_wrapper: false
+          
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+      
+      - name: Download Modules
+        id: get_modules
+        run: rake get_modules env=tst
 
       - name: Terraform Format
         id: fmt
