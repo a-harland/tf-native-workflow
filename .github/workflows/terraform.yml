@@ -153,7 +153,7 @@ jobs:
 
   compliance_iam_check:
     name: "Compliance IAM Checks"
-    needs: compliance_metadata_check
+    needs: terraform
     runs-on: ubuntu-18.04
     defaults:
       run:
@@ -238,7 +238,7 @@ jobs:
 
   compliance_kms_checks:
     name: "Compliance KMS Checks"
-    needs: compliance_metadata_check
+    needs: terraform
     runs-on: ubuntu-18.04
     defaults:
       run:
@@ -286,7 +286,7 @@ jobs:
 
   terraform_apply:
     name: "Terraform Apply"
-    needs: [terraform, compliance_iam_check, compliance_kms_checks]
+    needs: [terraform, compliance_metadata_check, compliance_iam_check, compliance_kms_checks]
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-18.04
     defaults:
