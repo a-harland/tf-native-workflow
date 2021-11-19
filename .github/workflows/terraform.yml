@@ -103,6 +103,54 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
+  compliance_kms_checks:
+    name: "Compliance KMS Checks"
+    needs: terraform
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./envs/${{ inputs.env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: a-harland/tf-native-policies
+          path: policy
+
+      - name: Setup Conftest
+        uses: artis3n/setup-conftest@v0
+        with:
+          conftest_version: 0.28.3
+          conftest_wrapper: true
+
+      - name: Save TF Plan
+        id: save_tf_plan
+        run: |
+          echo '${{needs.terraform.outputs.tf_plan}}'
+          echo '${{needs.terraform.outputs.tf_plan}}' > tfplan.json
+      
+      - name: Compliance KMS Check
+        id: compliance_kms_check
+        run: |
+          conftest test --parser json --policy ../../policy/kms tfplan.json
+        
+      - name: Compliance KMS Check Output
+        id: compliance_kms_check_output
+        uses: actions/github-script@v5
+        env: 
+          METADATA_CHECK_EXITCODE: "${{ steps.compliance_kms_check.outputs.exitcode }}"
+          METADATA_CHECK_ERRORS: "${{ steps.compliance_kms_check.outputs.stdout }}"
+        with:
+          script: |
+            const { METADATA_CHECK_EXITCODE, METADATA_CHECK_ERRORS } = process.env;
+            if (METADATA_CHECK_EXITCODE != 0) {
+              core.setFailed(METADATA_CHECK_ERRORS);
+            }
+    
   compliance_metadata_check:
     name: "Compliance Metadata Checks"
     needs: terraform
