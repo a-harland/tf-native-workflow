@@ -118,7 +118,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: a-harland/tf-native-policies
+          repository: a-harland/tf-native-policies@v2.0.0
           path: policy
 
       - name: Setup Conftest
@@ -166,7 +166,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: a-harland/tf-native-policies
+          repository: a-harland/tf-native-policies@v2.0.0
           path: policy
         
       - name: Setup Conftest
@@ -184,57 +184,18 @@ jobs:
         id: compliance_iam_check
         run: conftest test --parser json --policy ../../policy/iam tfplan.json
         
-      - name: Request IAM Approval
-        id: compliance_iam_request
-        uses: actions/github-script@v5
-        if: github.event_name == 'pull_request' && steps.compliance_iam_check.outputs.exitcode != 0
-        with:
-          script: |         
-           const currentReviewers = await github.rest.pulls.listRequestedReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ github.event.number }},
-           });
-
-           if (currentReviewers.data.users.some(e => e.login === 'asaharland')) {
-             console.log("Review already requested from IAM team.");
-           } else {
-               github.rest.pulls.requestReviewers({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: ${{ github.event.number }},
-                reviewers: ["asaharland"]
-              });
-           }
-           
-      - name: Check IAM Approval
-        id: compliance_iam_check_approval
-        if: github.event_name == 'pull_request' && steps.compliance_iam_check.outputs.exitcode != 0
+      - name: Compliance KMS Check Output
+        id: compliance_iam_check_output
         uses: actions/github-script@v5
         env: 
-          SHA: "${{ github.event.pull_request.head.sha }}"
+          METADATA_CHECK_EXITCODE: "${{ steps.compliance_iam_check.outputs.exitcode }}"
+          METADATA_CHECK_ERRORS: "${{ steps.compliance_iam_check.outputs.stdout }}"
         with:
           script: |
-           const { SHA } = process.env;
-           const reviews = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ github.event.number }},
-           });
-           if (reviews.data.length > 0) {
-             console.log(SHA);
-             console.log(reviews);
-             if (reviews.data.some(review => 
-                  review.user.login === 'asaharland' 
-                  && review.commit_id === SHA 
-                  && review.state.toUpperCase() === "APPROVED")) {
-               console.log("Review approved by IAM team.");
-             } else {
-               core.setFailed("IAM changes need to be approved by the IAM team.");
-             }
-           } else {
-             core.setFailed("IAM changes need to be reviewed by the IAM team.");
-           }
+            const { METADATA_CHECK_EXITCODE, METADATA_CHECK_ERRORS } = process.env;
+            if (METADATA_CHECK_EXITCODE != 0) {
+              core.setFailed(METADATA_CHECK_ERRORS);
+            }
 
   compliance_kms_checks:
     name: "Compliance KMS Checks"
@@ -251,7 +212,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: a-harland/tf-native-policies
+          repository: a-harland/tf-native-policies@v2.0.0
           path: policy
 
       - name: Setup Conftest
