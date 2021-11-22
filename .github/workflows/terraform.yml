@@ -186,7 +186,7 @@ jobs:
         id: compliance_iam_check
         run: conftest test --parser json --policy ../../policy/iam tfplan.json
         
-      - name: Compliance KMS Check Output
+      - name: Compliance IAM Check Output
         id: compliance_iam_check_output
         uses: actions/github-script@v5
         env: 
